@@ -11,16 +11,19 @@ from scoreBoard import ScoreBoard
 class Game:
     def __init__(self):
         self.settings = GameSettings()
-        self.scoreBoard = ScoreBoard(self.settings.numberBallsH)
-        self.gameBoard = GameBoard(self.settings.numberBallsH, self.settings.numberBallsV)
+        self.scoreBoard = ScoreBoard(self.settings.normalWidth, self.settings.normalHeight, self.settings.scaleFactor)
+        self.gameBoard = GameBoard(self.settings.normalWidth, self.settings.normalHeight, self.settings.scaleFactor)
+
 game = Game()
 
 
 # Display configuration
-size = (game.settings.numberBallsH*50, (game.settings.numberBallsV+2)*50+50)
+size = (int(game.settings.normalWidth * game.settings.scaleFactor), int(game.settings.normalHeight * game.settings.scaleFactor))
 screen = pygame.display.set_mode(size)
 screen.fill((255,255,255))
-pygame.display.set_caption("Combine - F. Geppner & D.Falkenstein")
+pygame.display.set_caption("Combine - F. Gnepper & D.Falkenstein")
+game.gameBoard.graphics()
+game.scoreBoard.graphics()
 
 
 
@@ -42,8 +45,8 @@ while gameRunning:
         if event.type == QUIT:
             gameRunning = False
             break
-    screen.blit(game.scoreBoard.surface, (0,0))
-    screen.blit(game.gameBoard.surface, (0,50))
+    screen.blit(game.gameBoard.surface, (0, 0))
+    screen.blit(game.scoreBoard.surface, (int(size[0]*0.5), 0))
     # Redisplay
     pygame.display.update()
 
