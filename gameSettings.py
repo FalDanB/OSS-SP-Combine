@@ -15,13 +15,4 @@ class GameSettings:
         self.ballColours = ("", "green", "yellow", "orange", "red", "pink", "purple", "blue", "cyan", "black", "white")
 
         #Ball Scores
-        self.level1BallScore = 5
-        self.level2BallScore = 10
-        self.level3BallScore = 20
-        self.level4BallScore = 40
-        self.level5BallScore = 80
-        self.level6BallScore = 160
-        self.level7BallScore = 320
-        self.level8BallScore = 640
-        self.level9BallScore = 1280
-        self.level10BallScore = 2560
+        self.levelBallScore = (5, 10, 20, 40, 80, 160,20, 640, 1280, 2560)
