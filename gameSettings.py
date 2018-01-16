@@ -11,8 +11,10 @@ class GameSettings:
         self.numberBallsV = 7
         self.ballDimension = 86
 
+        #Level Cap
+        self.maxLevel = 10
         #Ball Colours
         self.ballColours = ("", "green", "yellow", "orange", "red", "pink", "purple", "blue", "cyan", "black", "white")
 
         #Ball Scores
-        self.levelBallScore = (5, 10, 20, 40, 80, 160,20, 640, 1280, 2560)
+        self.levelBallScore = (0, 5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560)
