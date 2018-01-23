@@ -3,16 +3,31 @@ from pygame.locals import *
 import sqlite3
 import datetime
 
+
 class ScoreBoard:
     def __init__(self, settings):
         self.width = int(settings.normalWidth * settings.scaleFactor * 0.5)
         self.height = int(settings.normalHeight * settings.scaleFactor)
         self.highScores = loadHighscore(self)
 
-    def graphics(self, screen):
+    def img(self, screen):
         overlscore = pygame.image.load("images/overlscore2.png").convert_alpha()
         overlscore = pygame.transform.scale(overlscore, (self.width-10, self.height))
+
         screen.blit(overlscore, (self.width+10, 0))
+
+    def graphics(self, screen, font, score):
+        i = 0
+        for hs in self.highScores:
+            if hs[1] != 0 and i < 7:
+                ts = font.render(datetime.datetime.strptime(hs[0], "%Y-%m-%d %H:%M:%S.%f").strftime("%d/%m/%y %H:%M") +
+                                 " " + hs[1].__str__(), True, (200, 200, 0))
+                screen.blit(ts, (self.width + (self.width * 0.1), (self.height * 0.1) + (self.height/16 * i)))
+                i += 1
+
+        textsurface = font.render(score.__str__(), True, (200, 200, 0))
+
+        screen.blit(textsurface, (self.width + (self.width*0.5), self.height*0.72))
 
     def updateHighScore(self, newScore):
         newScoreDate = datetime.datetime.now()
