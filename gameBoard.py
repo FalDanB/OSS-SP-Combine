@@ -13,7 +13,7 @@ class GameBoard:
         self.ballsWidth = settings.numberBallsH
         self.ballsHeight = settings.numberBallsV
         self.ballDimension = settings.ballDimension*settings.scaleFactor
-        self.surface = pygame.Surface((self.width+10, self.height), pygame.SRCALPHA, 32)
+        #self.surface = pygame.Surface((self.width+10, self.height), pygame.SRCALPHA, 32)
         self.ballGrid = BallGrid(self.ballsWidth, self.ballsHeight+2)
         self.ballImages = []
         self.allBalls = []

@@ -4,10 +4,13 @@ from pygame.locals import *
 pygame.init()
 from gameSettings import GameSettings
 from gameBoard import GameBoard
+from instructions import Instructions
+from endScreen import EndScreen
 from scoreBoard import ScoreBoard
 from ballGrid import BallGrid
 from ball import Ball
 from random import randint
+
 
 
 
@@ -17,6 +20,8 @@ class Game:
         self.settings = GameSettings()
         self.scoreBoard = ScoreBoard(self.settings)
         self.gameBoard = GameBoard(self.settings)
+        self.instructions = Instructions()
+        self.endScreen = EndScreen()
         self.ballGrid = [[0 for x in range(self.settings.numberBallsH)] for y in range(self.settings.numberBallsV)]
 
 
@@ -65,8 +70,9 @@ game.score = 0
 
 # Assign Variables
 gameRunning = True
+gameStopped = False
 clock = pygame.time.Clock()
-
+showInstructions = True
 
 # Loop
 
@@ -79,7 +85,7 @@ while gameRunning:
         if event.type == QUIT:
             gameRunning = False
             break
-        if event.type == KEYDOWN:
+        if event.type == KEYDOWN and gameStopped == False:
             if game.is_player_ball() and (event.key == K_DOWN or event.key == K_s):
                 game.gameBoard.moveDown(game.get_player_balls())
                 mergedBallChains = game.gameBoard.checkBursts(game.get_player_balls(), game.settings.maxLevel) #check if balls are bursting, get chain of burst balls in return
@@ -98,12 +104,13 @@ while gameRunning:
                 game.gameBoard.moveLeft(game.get_player_balls())
             if game.is_player_ball() and (event.key == K_RIGHT or event.key == K_d):
                 game.gameBoard.moveRight(game.get_player_balls(), game.settings.numberBallsH-1)
-            if event.key == K_INSERT:
+            if event.key == K_SPACE:
                 game.create_balls()
+                showInstructions = False
             if game.gameBoard.checkIfEnded(game.get_player_balls()) == True:
                 game.scoreBoard.saveHighScore()
-                gameRunning = False
-                break
+                gameStopped = True
+                print(gameStopped)
             print(game.score)
 
 
@@ -113,6 +120,10 @@ while gameRunning:
     game.scoreBoard.graphics(screen)
     game.gameBoard.draw_grid(game.get_player_balls(), screen)
 
+    if showInstructions == True:
+        game.instructions.graphics(screen)
+    if gameStopped == True:
+        game.endScreen.graphics(screen)
     pygame.display.flip()
 
 
