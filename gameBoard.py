@@ -17,9 +17,12 @@ class GameBoard:
         self.ballGrid = BallGrid(self.ballsWidth, self.ballsHeight+2)
         self.ballImages = []
         self.allBalls = []
+        self.ball_down = 0
 
 
     def preloadBalls(self, settings):
+        self.ball_down = pygame.image.load("images/ball_down.png").convert_alpha()
+        self.ball_down = pygame.transform.scale(self.ball_down, (int(self.ballDimension), int(self.ballDimension)))
         for i in range(len(settings.ballColours)):
             if i > 0:
                 image = pygame.image.load("images/ball_"+ settings.ballColours[i]+".png").convert_alpha()
@@ -105,7 +108,7 @@ class GameBoard:
                 return True
         return False
 
-    def checkBursts(self, newBalls, maxLevel):
+    def checkBursts(self, newBalls, maxLevel, screen):
         ball0Chain=[newBalls[0]]
         ball1Chain=[newBalls[1]]
         mergedBallChains = []
@@ -117,20 +120,20 @@ class GameBoard:
         collapse = False
         if len(ball0Chain) >= 3:
 #score
-            removeBalls(self, ball0Chain)
-            createMergedBall(self, ball0Chain, maxLevel)
+            self.removeBalls(ball0Chain, screen)
+            self.createMergedBall(ball0Chain, maxLevel)
             collapse = True
             mergedBallChains.append(ball0Chain)
         if len(ball1Chain) >= 3:
 #score
-            removeBalls(self, ball1Chain)
-            createMergedBall(self, ball1Chain, maxLevel)
+            self.removeBalls(ball1Chain, screen)
+            self.createMergedBall(ball1Chain, maxLevel)
             collapse = True
             mergedBallChains.append(ball1Chain)
-        clearChecked(self) #set all balls to unchecked
-        if collapse == True:
-            collapseColumns(self)
-            checkAllBalls(self, maxLevel, mergedBallChains)
+        self.clearChecked() #set all balls to unchecked
+        if collapse:
+            self.collapseColumns()
+            self.checkAllBalls(maxLevel, mergedBallChains, screen)
         return mergedBallChains
 
     def checkNeighbours(self, ball, chain):
@@ -407,66 +410,69 @@ class GameBoard:
             counterx = 0
         self.graphics(screen)
 
-def clearChecked(self):
-    for i in self.allBalls:
-        i.checked = False
+    def clearChecked(self):
+        for i in self.allBalls:
+            i.checked = False
 
-def removeBalls(self, chain):
-    for ballToRemove in chain:
-        self.ballGrid.grid[ballToRemove.y][ballToRemove.x] = 0 # remove from grid
-        self.allBalls.remove(self.getBall(ballToRemove.x, ballToRemove.y)) #remove from Balls Array
+    def removeBalls(self, chain, screen):
+        for ballToRemove in chain:
+            screen.blit(self.ball_down, (ballToRemove.x * self.ballDimension + 20, ballToRemove.y * self.ballDimension + 40))
+            time.sleep(0.3)
+            pygame.display.flip()
+            self.ballGrid.grid[ballToRemove.y][ballToRemove.x] = 0 # remove from grid
+            self.allBalls.remove(self.getBall(ballToRemove.x, ballToRemove.y)) #remove from Balls Array
 
-#Create a merged ball after ball burst
-def createMergedBall(self,chain, maxLevel):
-    ballLevel = chain[0].level
-    if ballLevel < maxLevel:
-        bottomY = -1 # temp variable for position of most bottom ball
-        for i in chain:
-            if i.y > bottomY: #get position of most bottom ball
-                bottomY = i.y
-                bottomBall = i
-            elif i.y == bottomY: #use right-most ball if more balls are on bottom
-                if i.x < bottomBall.x:
+    #Create a merged ball after ball burst
+    def createMergedBall(self,chain, maxLevel):
+        ballLevel = chain[0].level
+        if ballLevel < maxLevel:
+            bottomY = -1 # temp variable for position of most bottom ball
+            for i in chain:
+                if i.y > bottomY: #get position of most bottom ball
+                    bottomY = i.y
                     bottomBall = i
-        self.createBall(bottomBall.x, bottomBall.y, bottomBall.level+1)
+                elif i.y == bottomY: #use right-most ball if more balls are on bottom
+                    if i.x < bottomBall.x:
+                        bottomBall = i
+            self.createBall(bottomBall.x, bottomBall.y, bottomBall.level+1)
 
-#Collapse Columns after each bursting
-def collapseColumns(self):
-    for colID in range(0,len(self.ballGrid.grid[0])): #loop through columns
-        rowID = len(self.ballGrid.grid)-1 #loop through rows in reverse order (except top 2)
-        while rowID>=2:
-            if self.ballGrid.grid[rowID][colID] == 0:
-                ballFound = False
-                i = 1
-                while ballFound == False and rowID-i >= 2: #check spaces on top until ball has been found or top row is reached
-                    if self.ballGrid.grid[rowID-i][colID] > 0:
-                        ballFound = True
-                        self.ballGrid.grid[rowID][colID] = self.ballGrid.grid[rowID-i][colID] # put ball level in empty space on grid
-                        self.ballGrid.grid[rowID-i][colID] = 0 # clear old ball positin
-                        ball = self.getBall(colID, rowID-i) # save the new position in ball object
-                        ball.x = colID
-                        ball.y = rowID
-                    i+=1
-            rowID-=1
+    #Collapse Columns after each bursting
+    def collapseColumns(self):
+        for colID in range(0,len(self.ballGrid.grid[0])): #loop through columns
+            rowID = len(self.ballGrid.grid)-1 #loop through rows in reverse order (except top 2)
+            while rowID>=2:
+                if self.ballGrid.grid[rowID][colID] == 0:
+                    ballFound = False
+                    i = 1
+                    while ballFound == False and rowID-i >= 2: #check spaces on top until ball has been found or top row is reached
+                        if self.ballGrid.grid[rowID-i][colID] > 0:
+                            ballFound = True
+                            self.ballGrid.grid[rowID][colID] = self.ballGrid.grid[rowID-i][colID] # put ball level in empty space on grid
+                            self.ballGrid.grid[rowID-i][colID] = 0 # clear old ball positin
+                            ball = self.getBall(colID, rowID-i) # save the new position in ball object
+                            ball.x = colID
+                            ball.y = rowID
+                        i+=1
+                rowID-=1
 
-def checkAllBalls(self, maxLevel, mergedBallChains):
-    print("CheckAllBalls")
-    chainFound = False
-    for ball in self.allBalls:
-        if ball.checked == False:
-            chain = [ball]
-            ball.checked = True
-            self.checkNeighbours(ball, chain)
-            print("Chain length: " + str(len(chain)))
-            for ball in chain:
-                print("X: " + str(ball.x) + " Y: " + str(ball.y) + " L: " + str(ball.level))
-            if len(chain) >= 3:
-                removeBalls(self, chain)
-                createMergedBall(self, chain, maxLevel)
-                chainFound = True
-                mergedBallChains.append(chain)
-        collapseColumns(self)
-        clearChecked(self)
-    if chainFound == True:
-        checkAllBalls(self, maxLevel, mergedBallChains)
+    def checkAllBalls(self, maxLevel, mergedBallChains, screen):
+        print("CheckAllBalls")
+        chainFound = False
+        for ball in self.allBalls:
+            if ball.checked == False:
+                chain = [ball]
+                ball.checked = True
+                self.checkNeighbours(ball, chain)
+                print("Chain length: " + str(len(chain)))
+                for ball in chain:
+                    print("X: " + str(ball.x) + " Y: " + str(ball.y) + " L: " + str(ball.level))
+                if len(chain) >= 3:
+                    self.removeBalls(chain, screen)
+                    self.createMergedBall(chain, maxLevel)
+                    chainFound = True
+                    mergedBallChains.append(chain)
+            self.collapseColumns()
+            self.clearChecked()
+        if chainFound == True:
+            self.checkAllBalls(maxLevel, mergedBallChains, screen)
 
