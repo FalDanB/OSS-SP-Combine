@@ -24,7 +24,8 @@ class Game:
         self.instructions = Instructions()
         self.endScreen = EndScreen()
         self.ballGrid = [[0 for x in range(self.settings.numberBallsH)] for y in range(self.settings.numberBallsV)]
-
+        self.level = 2
+        self.score = 0
 
     def create_balls(self):
         game.gameBoard.createBall(0,1,randint(1,game.level))
@@ -66,9 +67,6 @@ screen.blit(background, (0,0))
 
 textfont = pygame.font.SysFont('Arial', int(48*game.settings.scaleFactor))
 
-# Entities
-game.level = 2
-game.score = 0
 
 # Action
 
@@ -118,8 +116,16 @@ while gameRunning:
             if game.gameBoard.checkIfEnded(game.get_player_balls()) == True:
                 game.scoreBoard.saveHighScore()
                 gameStopped = True
-                print(gameStopped)
-            print(game.score)
+
+        if event.type == KEYDOWN and gameStopped == True:
+            if event.key == K_q:
+                gameRunning = False
+                break
+            if event.key == K_SPACE:
+                gameStopped = False
+                game = Game()
+                game.create_balls()
+                game.gameBoard.preloadBalls(game.settings)
 
     # Redisplay
     screen.fill((0,0,0))
