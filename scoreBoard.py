@@ -22,11 +22,16 @@ class ScoreBoard:
             if hs[1] != 0 and i < 7:
                 ts = font.render(datetime.datetime.strptime(hs[0], "%Y-%m-%d %H:%M:%S.%f").strftime("%d/%m/%y %H:%M") +
                                  " " + hs[1].__str__(), True, (200, 200, 0))
+                tshadow = font.render(datetime.datetime.strptime(hs[0], "%Y-%m-%d %H:%M:%S.%f").strftime("%d/%m/%y %H:%M") +
+                                 " " + hs[1].__str__(), True, (0, 0, 0))
+                screen.blit(tshadow, (self.width + (self.width * 0.1) + 2, (self.height * 0.1) + (self.height / 16 * i) + 2))
                 screen.blit(ts, (self.width + (self.width * 0.1), (self.height * 0.1) + (self.height/16 * i)))
                 i += 1
 
+        textshadow = font.render(score.__str__(), True, (0, 0, 0))
         textsurface = font.render(score.__str__(), True, (200, 200, 0))
 
+        screen.blit(textshadow, (self.width + (self.width * 0.5) + 2, (self.height * 0.72) + 2))
         screen.blit(textsurface, (self.width + (self.width*0.5), self.height*0.72))
 
     def updateHighScore(self, newScore):
