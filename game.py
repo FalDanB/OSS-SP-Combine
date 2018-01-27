@@ -56,7 +56,6 @@ game = Game()
 # Display configuration
 size = (int(game.settings.normalWidth * game.settings.scaleFactor), int(game.settings.normalHeight * game.settings.scaleFactor))
 screen = pygame.display.set_mode(size)
-screen.fill((255,255,255))
 pygame.display.set_caption("Combine - F. Gnepper & D. Falkenstein")
 game.gameBoard.graphics(screen)
 game.scoreBoard.img(screen)
@@ -64,11 +63,6 @@ game.gameBoard.preloadBalls(game.settings)
 background = pygame.image.load('images/background_1280X960.jpg')
 background = pygame.transform.scale(background, (int(game.settings.normalWidth * game.settings.scaleFactor), int(game.settings.normalHeight * game.settings.scaleFactor)))
 screen.blit(background, (0,0))
-
-textfont = pygame.font.SysFont('Arial', int(48*game.settings.scaleFactor))
-
-
-# Action
 
 # Assign Variables
 gameRunning = True
@@ -89,39 +83,40 @@ while gameRunning:
             break
         if event.type == KEYDOWN and gameStopped == False:
             if game.is_player_ball() and (event.key == K_DOWN or event.key == K_s):
-                game.gameBoard.moveDown(game.get_player_balls())
+                game.gameBoard.moveDown(game.get_player_balls()) #move the player balls to main grid
                 game.gameBoard.draw_grid(game.get_player_balls(), screen)
                 time.sleep(0.2)
                 pygame.display.flip()
                 mergedBallChains = game.gameBoard.checkBursts(game.get_player_balls(),
                                                               game.settings.maxLevel, screen)  # check if balls are bursting, get chain of burst balls in return
-                for chain in mergedBallChains:
+                for chain in mergedBallChains: #loop through all merged balls / chains
                     for ball in chain:
                         game.score += game.settings.levelBallScore[ball.level]  # increase the score for each burst ball
                         if ball.level > game.level:
                             game.level = ball.level  # increase the level if level of merged ball is higher than game level
                 if len(mergedBallChains) > 0:
                     game.scoreBoard.updateHighScore(game.score)
+                if game.gameBoard.checkIfEnded(game.get_player_balls()) == True: # check if game has Ended
+                    game.scoreBoard.saveHighScore()
+                    gameStopped = True
                 game.clearPlayerBalls()  # set all balls to "unchecked"
                 game.create_balls()  # create new player balls
-            if event.key == K_UP or event.key == K_w:
+
+            if event.key == K_UP or event.key == K_w: #rotate player balls
                 game.gameBoard.moveUp(game.get_player_balls(), game.settings.numberBallsH-1)
-            if game.is_player_ball() and (event.key == K_LEFT or event.key == K_a):
+            if game.is_player_ball() and (event.key == K_LEFT or event.key == K_a): #move player balls to left
                 game.gameBoard.moveLeft(game.get_player_balls())
-            if game.is_player_ball() and (event.key == K_RIGHT or event.key == K_d):
+            if game.is_player_ball() and (event.key == K_RIGHT or event.key == K_d): #move player balls to right
                 game.gameBoard.moveRight(game.get_player_balls(), game.settings.numberBallsH-1)
-            if event.key == K_SPACE:
+            if event.key == K_SPACE and showInstructions == True: # hide instructions and start game
                 game.create_balls()
                 showInstructions = False
-            if game.gameBoard.checkIfEnded(game.get_player_balls()) == True:
-                game.scoreBoard.saveHighScore()
-                gameStopped = True
 
-        if event.type == KEYDOWN and gameStopped == True:
-            if event.key == K_q:
+        if event.type == KEYDOWN and gameStopped == True: # Game Over
+            if event.key == K_q: # Quit game
                 gameRunning = False
                 break
-            if event.key == K_SPACE:
+            if event.key == K_SPACE: # Restart Game
                 gameStopped = False
                 game = Game()
                 game.create_balls()
@@ -131,12 +126,12 @@ while gameRunning:
     screen.fill((0,0,0))
     screen.blit(background, (0,0))
     game.scoreBoard.img(screen)
-    game.scoreBoard.graphics(screen, textfont, game.score)
+    game.scoreBoard.graphics(screen, game.settings, game.score)
     game.gameBoard.draw_grid(game.get_player_balls(), screen)
 
-    if showInstructions == True:
+    if showInstructions == True: # show instructions
         game.instructions.graphics(screen)
-    if gameStopped == True:
+    if gameStopped == True: # show end screen
         game.endScreen.graphics(screen)
     pygame.display.flip()
 
